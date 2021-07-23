@@ -71,6 +71,7 @@ public class EmployeePayrollService
 		}
 	}
 
+	//method to count entries
 	public long countEntries()
 	{
 		long entries = 0;
@@ -83,5 +84,18 @@ public class EmployeePayrollService
 			e.printStackTrace();
 		}
 		return entries;
+	}
+	
+	//method to print content of file
+	public void printData() 
+	{
+		try 
+		{
+			Files.lines(Paths.get(FILE_PATH)).forEach(System.out::println);
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 }
