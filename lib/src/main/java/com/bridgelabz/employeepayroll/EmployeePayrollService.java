@@ -43,10 +43,12 @@ public class EmployeePayrollService
 			String employeeDataString = employee.toString().concat("\n");
 			empBuffer.append(employeeDataString);
 		});
+		
 		try {
 			Files.write(Paths.get(FILE_PATH), empBuffer.toString().getBytes());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 	}
@@ -97,5 +99,19 @@ public class EmployeePayrollService
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public long readDataFromFile()
+	{
+		try 
+		{
+			String data = Files.readString(Paths.get(FILE_PATH));
+			System.out.println(data);
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		return countEntries();
 	}
 }
