@@ -4,6 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -113,5 +119,20 @@ public class EmployeePayrollService
 			e.printStackTrace();
 		}
 		return countEntries();
+	}
+
+	
+
+	private Connection getConnection() throws SQLException
+	{
+		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
+		String username = "root";
+		String password = "Jayesh@13";
+		System.out.println("Conecting to database"+jdbcURL);
+		Connection connection = null;
+		connection = DriverManager.getConnection(jdbcURL,username,password);
+		System.out.println("Connection sucessful" + connection);
+		
+		return connection;
 	}
 }
