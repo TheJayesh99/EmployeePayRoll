@@ -52,6 +52,13 @@ public class EmployeePayrollTest
 		assertEquals(3, employeePayrollService.countEntries());
 	}
 	
+	@Test
+	public void givenEmployeePayrollInDB_WhenRetrived_ShouldMatchEmployeeCount()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		 List<EmployeeData> employeeList = employeePayrollService.readEmployeePayrollFromDB();
+		assertEquals(5, employeeList.size());
+	}
 
 }
 

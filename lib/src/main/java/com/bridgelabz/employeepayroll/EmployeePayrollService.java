@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+
 public class EmployeePayrollService 
 {
 	private List<EmployeeData> employePayrollList = new ArrayList<EmployeeData>();
@@ -121,7 +122,29 @@ public class EmployeePayrollService
 		return countEntries();
 	}
 
-	
+	public List<EmployeeData> readEmployeePayrollFromDB() 
+	{
+		try(Connection connection = this.getConnection())
+		{
+			String sql = " select * from employee_payroll";
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			while(result.next())
+			{
+				int id = result.getInt("id");
+				String name = result.getString("name");
+				Integer salary = result.getInt("basicPay");
+				LocalDate startdate = result.getDate("start").toLocalDate();
+				employePayrollList.add(new EmployeeData(id, name, salary, startdate));
+			}
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return employePayrollList;
+		
+	}
 
 	private Connection getConnection() throws SQLException
 	{
