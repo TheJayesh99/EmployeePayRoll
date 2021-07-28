@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,7 +23,17 @@ public class EmployeePayrollService
 	Scanner scanner = new Scanner(System.in);
 	private static final String FILE_PATH = "c://Users//malij//OneDrive//Desktop//payroll-file.txt";
 
-	
+	//to create prepared statement
+	private PreparedStatement employeePayrollStatement;
+	private static EmployeePayrollService employeePayrollService;
+	public  EmployeePayrollService getInstance()
+	{
+		if (employeePayrollService == null)
+		{
+			employeePayrollService = new EmployeePayrollService();
+		}
+		return employeePayrollService;
+	}
 
 	public void readEmployeeDataFromConsole() 
 	{
@@ -194,9 +204,13 @@ public class EmployeePayrollService
 		}
 		return 0;
 	}
-
 	
-
+	public boolean checkSyncWithDB(String name)  //checking sync with DB
+	{
+		List<EmployeeData> employeeDataFromDBList = new EmployeePayrollService().getEmployeeDataFromDB(name);
+		return employeeDataFromDBList.get(0).equals(getEmployeeDataFromDB(name).get(0));
+	}
+	
 	//setting the values
 	private List<EmployeeData> getEmployeeDataFromDB(ResultSet resultSet)
 	{
@@ -218,6 +232,41 @@ public class EmployeePayrollService
 		}
 		return employeePayrollData;
 	}
-	
-	
+
+	private List<EmployeeData> getEmployeeDataFromDB(String name) //Getting data from database
+	{
+		List<EmployeeData> employeePayrollList = new ArrayList<>();
+		if (this.employeePayrollStatement == null) //checking for existing prepare statement
+		{
+			this.prepareStatementForEmployee();
+		}
+		try 
+		{
+			employeePayrollStatement.setString(1, name);
+			ResultSet resultSet = employeePayrollStatement.executeQuery();
+			employeePayrollList = this.getEmployeeDataFromDB(resultSet);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return employeePayrollList;
+	}
+
+	//created a prepared statement
+	private void prepareStatementForEmployee() 
+	{
+		try 
+		{
+			Connection connection = this.getConnection();
+			String sql = "Select * from employee_payroll where name = ? ";
+			employeePayrollStatement = connection.prepareStatement(sql);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
+
+
 }

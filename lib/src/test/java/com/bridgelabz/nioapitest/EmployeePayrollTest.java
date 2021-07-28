@@ -1,6 +1,7 @@
 package com.bridgelabz.nioapitest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -61,11 +62,20 @@ public class EmployeePayrollTest
 	}
 	
 	@Test
-	public void givenEmployeePayrollDB_WhenTeresaSalaryUpdated_ShouldSyncWithDatabase()
+	public void givenEmployeePayrollDB_WhenTeresaSalaryUpdated_ShouldUpdateSalary()
 	{
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		int rowsChanged  = employeePayrollService.updateSalaryInDB("Teresa",3000000);
 		assertEquals(1, rowsChanged);
+	}
+
+	@Test
+	public void givenEmployeePayrollDB_WhenTeresaSalaryUpdated_ShouldSyncWithDatabase()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.updateSalaryInDB("Teresa",3000000);
+		boolean result = employeePayrollService.checkSyncWithDB("Teresa");
+		assertTrue(result);
 	}
 
 }
