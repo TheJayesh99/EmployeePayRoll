@@ -77,6 +77,14 @@ public class EmployeePayrollTest
 		boolean result = employeePayrollService.checkSyncWithDB("Teresa");
 		assertTrue(result);
 	}
+	
+	@Test
+	public void givenEmployeePayrollDB_WhenGivendate_ShouldRetunListOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeeData> employeeList = employeePayrollService.employeeJoinedAfterDate("2019-01-01");
+		assertEquals(3, employeeList.size());
+	}
 
 }
 

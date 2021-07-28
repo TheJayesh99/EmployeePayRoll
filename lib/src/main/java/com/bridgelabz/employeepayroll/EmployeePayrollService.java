@@ -154,6 +154,7 @@ public class EmployeePayrollService
 
 	}
 
+	//creating connection
 	private Connection getConnection() throws SQLException
 	{
 		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
@@ -266,6 +267,25 @@ public class EmployeePayrollService
 		{
 			e.printStackTrace();
 		}
+	}
+
+	//Retrieving data after joining date
+	public List<EmployeeData> employeeJoinedAfterDate(String date) 
+	{
+		List<EmployeeData> employeePayrollList = new ArrayList<>();
+		try(Connection connection = this.getConnection())
+		{
+			String sql = " Select  * from employee_payroll  Where start Between cast('"+date+"' as date) and date(now());";
+			System.out.println(sql);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery(sql);
+			employeePayrollList = this.getEmployeeDataFromDB(resultSet);
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return employeePayrollList;
 	}
 
 
