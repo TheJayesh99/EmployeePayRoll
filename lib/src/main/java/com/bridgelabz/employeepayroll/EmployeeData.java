@@ -1,13 +1,14 @@
 package com.bridgelabz.employeepayroll;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class EmployeeData
 {
-	private int employeeId;
-	private String employeeName;
-	private int employeeSalary;
-	private LocalDate startDate;
+	public int employeeId;
+	public String employeeName;
+	public int employeeSalary;
+	public LocalDate startDate;
 	
 	public EmployeeData(int employeeId, String employeeName, int employeeSalary) 
 	{
@@ -34,6 +35,19 @@ public class EmployeeData
 	{
 		return "EmployeeData [employeeId=" + employeeId + ", employeeName=" + employeeName + ", employeeSalary="
 				+ employeeSalary + ", startDate=" + startDate + "]";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EmployeeData other = (EmployeeData) obj;
+		return employeeId == other.employeeId && Objects.equals(employeeName, other.employeeName)
+				&& employeeSalary == other.employeeSalary && Objects.equals(startDate, other.startDate);
 	}
 	
 	

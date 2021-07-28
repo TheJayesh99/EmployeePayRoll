@@ -1,11 +1,13 @@
 package com.bridgelabz.employeepayroll;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,6 +22,8 @@ public class EmployeePayrollService
 	private List<EmployeeData> employePayrollList = new ArrayList<EmployeeData>();
 	Scanner scanner = new Scanner(System.in);
 	private static final String FILE_PATH = "c://Users//malij//OneDrive//Desktop//payroll-file.txt";
+
+	
 
 	public void readEmployeeDataFromConsole() 
 	{
@@ -50,7 +54,7 @@ public class EmployeePayrollService
 			String employeeDataString = employee.toString().concat("\n");
 			empBuffer.append(employeeDataString);
 		});
-		
+
 		try {
 			Files.write(Paths.get(FILE_PATH), empBuffer.toString().getBytes());
 		} 
@@ -94,7 +98,7 @@ public class EmployeePayrollService
 		}
 		return entries;
 	}
-	
+
 	//method to print content of file
 	public void printData() 
 	{
@@ -107,7 +111,7 @@ public class EmployeePayrollService
 			e.printStackTrace();
 		}
 	}
-	
+
 	public long readDataFromFile()
 	{
 		try 
@@ -124,26 +128,20 @@ public class EmployeePayrollService
 
 	public List<EmployeeData> readEmployeePayrollFromDB() 
 	{
+		List<EmployeeData> employeePayrollList = new ArrayList<>();
 		try(Connection connection = this.getConnection())
 		{
 			String sql = " select * from employee_payroll";
 			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery(sql);
-			while(result.next())
-			{
-				int id = result.getInt("id");
-				String name = result.getString("name");
-				Integer salary = result.getInt("basicPay");
-				LocalDate startdate = result.getDate("start").toLocalDate();
-				employePayrollList.add(new EmployeeData(id, name, salary, startdate));
-			}
+			ResultSet resultSet = statement.executeQuery(sql);
+			employeePayrollList = this.getEmployeeDataFromDB(resultSet);
 		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
 		}
-		return employePayrollList;
-		
+		return employeePayrollList;
+
 	}
 
 	private Connection getConnection() throws SQLException
@@ -155,7 +153,71 @@ public class EmployeePayrollService
 		Connection connection = null;
 		connection = DriverManager.getConnection(jdbcURL,username,password);
 		System.out.println("Connection sucessful" + connection);
-		
+
 		return connection;
 	}
+
+	public int updateSalaryInDB(String name, int salary)
+	{
+		int result = updateSalary(name, salary); //updating salary
+		if (result != 0) 
+		{
+			EmployeeData employeeData = this.getEmployeeData(name); 
+			if (employeeData != null)
+			{
+				employeeData.employeeSalary = salary;  //changing value in list
+			}
+		}
+		return result;
+	}
+
+	private EmployeeData getEmployeeData(String name)  //Searching employee by name 
+	{
+		return employePayrollList.stream()
+				.filter(employee -> employee.employeeName.equals(name))
+				.findFirst()
+				.orElse(null); 
+	}
+
+	private int updateSalary(String name, int salary) 
+	{
+		try(Connection connection = this.getConnection())
+		{
+			String sql = "update employee_payroll set basicPay = "+salary+" where name = '"+name+"'";
+			Statement statement = connection.createStatement();
+			int rowChanged = statement.executeUpdate(sql);
+			return rowChanged;
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	
+
+	//setting the values
+	private List<EmployeeData> getEmployeeDataFromDB(ResultSet resultSet)
+	{
+		List<EmployeeData> employeePayrollData = new ArrayList<>();
+		try 
+		{
+			while(resultSet.next())
+			{
+				int id = resultSet.getInt("id");
+				String name = resultSet.getString("name");
+				Integer salary = resultSet.getInt("basicPay");
+				LocalDate startdate = resultSet.getDate("start").toLocalDate();
+				employeePayrollData.add(new EmployeeData(id, name, salary, startdate));
+			}
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return employeePayrollData;
+	}
+	
+	
 }
