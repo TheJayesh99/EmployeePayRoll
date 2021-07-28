@@ -86,5 +86,86 @@ public class EmployeePayrollTest
 		assertEquals(3, employeeList.size());
 	}
 
+	@Test
+	public void givenoFindSumOfAllEmployee_WhenFemale_ShouldRetunSumOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("sum",'F');
+		assertEquals(3000000.00, result,0.00);
+	}
+
+	@Test
+	public void givenoFindSumOfAllEmployee_WhenMale_ShouldRetunSumOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("sum",'M');
+		assertEquals(90000.00, result,0.00);
+	}
+
+	@Test
+	public void givenoFindAvgOfAllEmployee_WhenFemale_ShouldRetunAvgOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("avg",'F');
+		assertEquals(3000000.00, result,0.00);
+	}
+	
+	@Test
+	public void givenoFindAvgOfAllEmployee_WhenMale_ShouldRetunAvgOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("avg",'M');
+		assertEquals(30000, result,0.00);
+	}
+
+	
+	@Test
+	public void givenoFindMinOfAllEmployee_WhenFemale_ShouldRetunMinOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("min",'F');
+		assertEquals(3000000.00, result,0.00);
+	}
+	
+	@Test
+	public void givenoFindMinOfAllEmployee_WhenMale_ShouldRetunMinOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("min",'M');
+		assertEquals(10000, result,0.00);
+	}
+
+	@Test
+	public void givenoFindMaxOfAllEmployee_WhenFemale_ShouldRetunMaxOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("max",'F');
+		assertEquals(3000000.00, result,0.00);
+	}
+	
+	@Test
+	public void givenoFindMinOfAllEmployee_WhenMale_ShouldRetunMaxOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("max",'M');
+		assertEquals(40000, result,0.00);
+	}
+
+	@Test
+	public void givenoFindCountOfAllEmployee_WhenFemale_ShouldRetunCountOFSalaryOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("count",'F');
+		assertEquals(1, result,0.00);
+	}
+	
+	@Test
+	public void givenoFindCountOfAllEmployee_WhenMale_ShouldRetunCountOfEmployees()
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		double result = employeePayrollService.calculateOfSalaryByGender("count",'M');
+		assertEquals(3, result,0.00);
+	}
+
 }
 

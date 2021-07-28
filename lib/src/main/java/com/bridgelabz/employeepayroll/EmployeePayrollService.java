@@ -288,5 +288,23 @@ public class EmployeePayrollService
 		return employeePayrollList;
 	}
 
+	public double calculateOfSalaryByGender(String operation,char gender)
+	{
+		try(Connection connection = this.getConnection())
+		{
+			String sql = " select "+operation+"(basicPay) from employee_payroll where gender='"+gender+"' group by gender;";
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery(sql);
+			resultSet.next();
+			return resultSet.getDouble(operation+"(basicPay)");				
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return 0.0;
+	}
+
+
 
 }
