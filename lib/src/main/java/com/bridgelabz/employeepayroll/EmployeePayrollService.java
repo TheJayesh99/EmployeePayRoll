@@ -19,9 +19,10 @@ import java.util.Scanner;
 
 public class EmployeePayrollService 
 {
-	private List<EmployeeData> employePayrollList = new ArrayList<EmployeeData>();
+	private List<EmployeeData> employePayrollListFile = new ArrayList<EmployeeData>();
 	Scanner scanner = new Scanner(System.in);
 	private static final String FILE_PATH = "c://Users//malij//OneDrive//Desktop//payroll-file.txt";
+	List<EmployeeData> employeePayrollListDB = new ArrayList<>();
 
 	//to create prepared statement
 	private PreparedStatement employeePayrollStatement;
@@ -43,24 +44,24 @@ public class EmployeePayrollService
 		String Name = scanner.next();
 		System.out.println("Enter the salary");
 		int salary = scanner.nextInt();
-		employePayrollList.add(new EmployeeData(id, Name, salary));
+		employePayrollListFile.add(new EmployeeData(id, Name, salary));
 	}
 
 	public void writeEmployeeDataInConsole() 
 	{
-		System.out.println("Writing Employee Pay Roll Data \n"+employePayrollList);
+		System.out.println("Writing Employee Pay Roll Data \n"+employePayrollListFile);
 	}
 
 	public void addEmployee(EmployeeData employee)
 	{
-		employePayrollList.add(employee);
+		employePayrollListFile.add(employee);
 	}
 
 	public void writeEmployeeDataToFile()  
 	{
 		checkFile();
 		StringBuffer empBuffer = new StringBuffer();
-		employePayrollList.forEach(employee ->{
+		employePayrollListFile.forEach(employee ->{
 			String employeeDataString = employee.toString().concat("\n");
 			empBuffer.append(employeeDataString);
 		});
@@ -135,23 +136,27 @@ public class EmployeePayrollService
 		}
 		return countEntries();
 	}
-
+	
+	//method to read data from database
 	public List<EmployeeData> readEmployeePayrollFromDB() 
 	{
-		List<EmployeeData> employeePayrollList = new ArrayList<>();
+		String sql = " select * from employee";
+		return getQueryResult(sql);
+	}
+
+	//gets the query result and store them into object;
+	private List<EmployeeData> getQueryResult(String sql) {
 		try(Connection connection = this.getConnection())
 		{
-			String sql = " select * from employee_payroll";
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery(sql);
-			employeePayrollList = this.getEmployeeDataFromDB(resultSet);
+			employeePayrollListDB = this.getEmployeeDataFromDB(resultSet);
 		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
 		}
-		return employeePayrollList;
-
+		return employeePayrollListDB;
 	}
 
 	//creating connection
@@ -184,7 +189,7 @@ public class EmployeePayrollService
 
 	private EmployeeData getEmployeeData(String name)  //Searching employee by name 
 	{
-		return employePayrollList.stream()
+		return employePayrollListFile.stream()
 				.filter(employee -> employee.employeeName.equals(name))
 				.findFirst()
 				.orElse(null); 
@@ -194,7 +199,7 @@ public class EmployeePayrollService
 	{
 		try(Connection connection = this.getConnection())
 		{
-			String sql = "update employee_payroll set basicPay = "+salary+" where name = '"+name+"'";
+			String sql = "update employee set basicPay = "+salary+" where name = '"+name+"'";
 			Statement statement = connection.createStatement();
 			int rowChanged = statement.executeUpdate(sql);
 			return rowChanged;
@@ -220,7 +225,7 @@ public class EmployeePayrollService
 		{
 			while(resultSet.next())
 			{
-				int id = resultSet.getInt("id");
+				int id = resultSet.getInt("emp_id");
 				String name = resultSet.getString("name");
 				Integer salary = resultSet.getInt("basicPay");
 				LocalDate startdate = resultSet.getDate("start").toLocalDate();
@@ -260,7 +265,7 @@ public class EmployeePayrollService
 		try 
 		{
 			Connection connection = this.getConnection();
-			String sql = "Select * from employee_payroll where name = ? ";
+			String sql = "Select * from employee where name = ? ";
 			employeePayrollStatement = connection.prepareStatement(sql);
 		}
 		catch (Exception e) 
@@ -272,27 +277,15 @@ public class EmployeePayrollService
 	//Retrieving data after joining date
 	public List<EmployeeData> employeeJoinedAfterDate(String date) 
 	{
-		List<EmployeeData> employeePayrollList = new ArrayList<>();
-		try(Connection connection = this.getConnection())
-		{
-			String sql = " Select  * from employee_payroll  Where start Between cast('"+date+"' as date) and date(now());";
-			System.out.println(sql);
-			Statement statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery(sql);
-			employeePayrollList = this.getEmployeeDataFromDB(resultSet);
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return employeePayrollList;
+		String sql = " Select  * from employee  Where start Between cast('"+date+"' as date) and date(now());";
+		return getQueryResult(sql);
 	}
 
 	public double calculateOfSalaryByGender(String operation,char gender)
 	{
 		try(Connection connection = this.getConnection())
 		{
-			String sql = " select "+operation+"(basicPay) from employee_payroll where gender='"+gender+"' group by gender;";
+			String sql = " select "+operation+"(basicPay) from employee where gender='"+gender+"' group by gender;";
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery(sql);
 			resultSet.next();
@@ -303,6 +296,32 @@ public class EmployeePayrollService
 			e.printStackTrace();
 		}
 		return 0.0;
+	}
+
+
+	public void addDataInDB(String name, char gender, int basicPay, String startDate)
+	{
+		try(Connection connection = this.getConnection())
+		{
+			String sql = "insert into employee (name,gender,basicpay,start) values "
+					+ "('"+name+"','"+gender+"',"+basicPay+",'"+startDate+"');";
+			Statement statement = connection.createStatement();
+			int rowsChanged = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
+			if (rowsChanged == 1) 
+			{
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if(resultSet.next())
+				{
+					int employeeId = resultSet.getInt(1);
+					employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate)));
+				}
+			}
+			System.out.println(employeePayrollListDB.toString());
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 

@@ -83,7 +83,7 @@ public class EmployeePayrollTest
 	{
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeeData> employeeList = employeePayrollService.employeeJoinedAfterDate("2019-01-01");
-		assertEquals(3, employeeList.size());
+		assertEquals(2, employeeList.size());
 	}
 
 	@Test
@@ -165,6 +165,16 @@ public class EmployeePayrollTest
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		double result = employeePayrollService.calculateOfSalaryByGender("count",'M');
 		assertEquals(3, result,0.00);
+	}
+	
+	@Test
+	public void givenEmployeDetails_WhenInserted_ShouldSyncWithDatabase() 
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollFromDB();
+		employeePayrollService.addDataInDB("Mark",'M',40000,"2020-01-03");
+		boolean result = employeePayrollService.checkSyncWithDB("Mark");
+		assertTrue(result);
 	}
 
 }
