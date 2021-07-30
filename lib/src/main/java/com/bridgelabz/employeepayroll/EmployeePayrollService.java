@@ -136,7 +136,7 @@ public class EmployeePayrollService
 		}
 		return countEntries();
 	}
-	
+
 	//method to read data from database
 	public List<EmployeeData> readEmployeePayrollFromDB() 
 	{
@@ -210,13 +210,13 @@ public class EmployeePayrollService
 		}
 		return 0;
 	}
-	
+
 	public boolean checkSyncWithDB(String name)  //checking sync with DB
 	{
 		List<EmployeeData> employeeDataFromDBList = new EmployeePayrollService().getEmployeeDataFromDB(name);
 		return employeeDataFromDBList.get(0).equals(getEmployeeDataFromDB(name).get(0));
 	}
-	
+
 	//setting the values
 	private List<EmployeeData> getEmployeeDataFromDB(ResultSet resultSet)
 	{
@@ -301,6 +301,7 @@ public class EmployeePayrollService
 
 	public void addDataInDB(String name, char gender, int basicPay, String startDate)
 	{
+		int employeeId = 0;
 		try(Connection connection = this.getConnection())
 		{
 			String sql = "insert into employee (name,gender,basicpay,start) values "
@@ -312,18 +313,35 @@ public class EmployeePayrollService
 				ResultSet resultSet = statement.getGeneratedKeys();
 				if(resultSet.next())
 				{
-					int employeeId = resultSet.getInt(1);
-					employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate)));
+					employeeId = resultSet.getInt(1);
 				}
 			}
-			System.out.println(employeePayrollListDB.toString());
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		try(Connection connection = this.getConnection())
+		{
+			double deduction = basicPay*0.2;
+			double taxablePay = basicPay-deduction;
+			double tax = taxablePay*0.1;
+			double netPay = basicPay-tax;
+		
+			String sql =" insert into pay_roll(emp_id,basePay,deduction,taxablePay,IncomeTax,netPay)"
+					+ " values ("+employeeId+","+basicPay+","+deduction+","+taxablePay+","+tax+","+netPay+");";
+			Statement statement = connection.createStatement();
+			int rowsChanged = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
+			if (rowsChanged == 1) 
+			{
+				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate)));
+				System.out.println(employeePayrollListDB.toString());
+			}
 		}
 		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}
 	}
-
-
 
 }
