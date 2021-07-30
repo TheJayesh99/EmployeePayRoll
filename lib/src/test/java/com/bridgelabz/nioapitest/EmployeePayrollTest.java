@@ -73,6 +73,7 @@ public class EmployeePayrollTest
 	public void givenEmployeePayrollDB_WhenTeresaSalaryUpdated_ShouldSyncWithDatabase()
 	{
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollFromDB();
 		employeePayrollService.updateSalaryInDB("Teresa",3000000);
 		boolean result = employeePayrollService.checkSyncWithDB("Teresa");
 		assertTrue(result);

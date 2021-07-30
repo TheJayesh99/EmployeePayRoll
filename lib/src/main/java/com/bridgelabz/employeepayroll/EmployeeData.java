@@ -1,6 +1,7 @@
 package com.bridgelabz.employeepayroll;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 public class EmployeeData
@@ -9,6 +10,7 @@ public class EmployeeData
 	public String employeeName;
 	public int employeeSalary;
 	public LocalDate startDate;
+	public List<String> department;
 	
 	public EmployeeData(int employeeId, String employeeName, int employeeSalary) 
 	{
@@ -19,22 +21,22 @@ public class EmployeeData
 	}
 	
 
-	public EmployeeData(int employeeId, String employeeName, int employeeSalary, LocalDate startDate) 
+	public EmployeeData(int employeeId, String employeeName, int employeeSalary, LocalDate startDate,List<String> department) 
 	{
 		super();
 		this.employeeId = employeeId;
 		this.employeeName = employeeName;
 		this.employeeSalary = employeeSalary;
 		this.startDate = startDate;
+		this.department = department;
 	}
 
 
 
 	@Override
-	public String toString() 
-	{
+	public String toString() {
 		return "EmployeeData [employeeId=" + employeeId + ", employeeName=" + employeeName + ", employeeSalary="
-				+ employeeSalary + ", startDate=" + startDate + "]";
+				+ employeeSalary + ", startDate=" + startDate + ", department=" + department + "]";
 	}
 
 	@Override
@@ -46,9 +48,12 @@ public class EmployeeData
 		if (getClass() != obj.getClass())
 			return false;
 		EmployeeData other = (EmployeeData) obj;
-		return employeeId == other.employeeId && Objects.equals(employeeName, other.employeeName)
-				&& employeeSalary == other.employeeSalary && Objects.equals(startDate, other.startDate);
+		return Objects.equals(department, other.department) && employeeId == other.employeeId
+				&& Objects.equals(employeeName, other.employeeName) && employeeSalary == other.employeeSalary
+				&& Objects.equals(startDate, other.startDate);
 	}
-	
+
+
+
 	
 }

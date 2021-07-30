@@ -140,7 +140,9 @@ public class EmployeePayrollService
 	//method to read data from database
 	public List<EmployeeData> readEmployeePayrollFromDB() 
 	{
-		String sql = " select * from employee";
+		String sql = "select * from employee"
+				+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
+				+ " join department on (department.d_id=emp_dept.did);";
 		return getQueryResult(sql);
 	}
 
@@ -189,7 +191,7 @@ public class EmployeePayrollService
 
 	private EmployeeData getEmployeeData(String name)  //Searching employee by name 
 	{
-		return employePayrollListFile.stream()
+		return employeePayrollListDB.stream()
 				.filter(employee -> employee.employeeName.equals(name))
 				.findFirst()
 				.orElse(null); 
@@ -214,13 +216,12 @@ public class EmployeePayrollService
 	public boolean checkSyncWithDB(String name)  //checking sync with DB
 	{
 		List<EmployeeData> employeeDataFromDBList = new EmployeePayrollService().getEmployeeDataFromDB(name);
-		return employeeDataFromDBList.get(0).equals(getEmployeeDataFromDB(name).get(0));
+		return employeeDataFromDBList.get(0).equals(getEmployeeData(name));
 	}
 
 	//setting the values
 	private List<EmployeeData> getEmployeeDataFromDB(ResultSet resultSet)
 	{
-		List<EmployeeData> employeePayrollData = new ArrayList<>();
 		try 
 		{
 			while(resultSet.next())
@@ -229,14 +230,31 @@ public class EmployeePayrollService
 				String name = resultSet.getString("name");
 				Integer salary = resultSet.getInt("basicPay");
 				LocalDate startdate = resultSet.getDate("start").toLocalDate();
-				employeePayrollData.add(new EmployeeData(id, name, salary, startdate));
+				EmployeeData employee = employeePayrollListDB.stream().filter(employees-> employees.employeeId == id).findFirst().orElse(null);
+				try {
+				if(employee != null)
+				{
+					employee.department.add(resultSet.getString("dname"));
+				}
+				else
+				{
+					List<String> department = new ArrayList<String>(); 
+					department.add( resultSet.getString("dname"));					
+					employeePayrollListDB.add(new EmployeeData(id, name, salary, startdate,department));  //TODO add employee department array
+				}	
+				}
+				catch(Exception e)
+				{
+					System.err.println("Problem");
+				}
 			}
+			System.out.println(employeePayrollListDB);
 		}
 		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}
-		return employeePayrollData;
+		return employeePayrollListDB;
 	}
 
 	private List<EmployeeData> getEmployeeDataFromDB(String name) //Getting data from database
@@ -265,7 +283,9 @@ public class EmployeePayrollService
 		try 
 		{
 			Connection connection = this.getConnection();
-			String sql = "Select * from employee where name = ? ";
+			String sql = "Select * from employee "
+					
+					+ "where name = ? ";
 			employeePayrollStatement = connection.prepareStatement(sql);
 		}
 		catch (Exception e) 
@@ -277,7 +297,9 @@ public class EmployeePayrollService
 	//Retrieving data after joining date
 	public List<EmployeeData> employeeJoinedAfterDate(String date) 
 	{
-		String sql = " Select  * from employee  Where start Between cast('"+date+"' as date) and date(now());";
+		String sql = " Select  * from employee "
+			
+				+ " Where start Between cast('"+date+"' as date) and date(now());";
 		return getQueryResult(sql);
 	}
 
@@ -332,7 +354,7 @@ public class EmployeePayrollService
 			int rowsChangedForquery2 = statement.executeUpdate(query2,Statement.RETURN_GENERATED_KEYS);
 			if (rowsChangedForquery2 == 1) 
 			{
-				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate)));
+				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate), null)); //TODO add department array				
 				System.out.println(employeePayrollListDB.toString());
 			}
 			connection.commit();
