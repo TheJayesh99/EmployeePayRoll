@@ -240,7 +240,7 @@ public class EmployeePayrollService
 				{
 					List<String> department = new ArrayList<String>(); 
 					department.add( resultSet.getString("dname"));					
-					employeePayrollListDB.add(new EmployeeData(id, name, salary, startdate,department));  //TODO add employee department array
+					employeePayrollListDB.add(new EmployeeData(id, name, salary, startdate,department));
 				}	
 				}
 				catch(Exception e)
@@ -248,7 +248,6 @@ public class EmployeePayrollService
 					System.err.println("Problem");
 				}
 			}
-			System.out.println(employeePayrollListDB);
 		}
 		catch (Exception e) 
 		{
@@ -284,7 +283,8 @@ public class EmployeePayrollService
 		{
 			Connection connection = this.getConnection();
 			String sql = "Select * from employee "
-					
+					+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
+					+ " join department on (department.d_id=emp_dept.did)"
 					+ "where name = ? ";
 			employeePayrollStatement = connection.prepareStatement(sql);
 		}
@@ -298,7 +298,8 @@ public class EmployeePayrollService
 	public List<EmployeeData> employeeJoinedAfterDate(String date) 
 	{
 		String sql = " Select  * from employee "
-			
+				+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
+				+ " join department on (department.d_id=emp_dept.did)"
 				+ " Where start Between cast('"+date+"' as date) and date(now());";
 		return getQueryResult(sql);
 	}
@@ -355,7 +356,6 @@ public class EmployeePayrollService
 			if (rowsChangedForquery2 == 1) 
 			{
 				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate), null)); //TODO add department array				
-				System.out.println(employeePayrollListDB.toString());
 			}
 			connection.commit();
 		}
