@@ -232,16 +232,16 @@ public class EmployeePayrollService
 				LocalDate startdate = resultSet.getDate("start").toLocalDate();
 				EmployeeData employee = employeePayrollListDB.stream().filter(employees-> employees.employeeId == id).findFirst().orElse(null);
 				try {
-				if(employee != null)
-				{
-					employee.department.add(resultSet.getString("dname"));
-				}
-				else
-				{
-					List<String> department = new ArrayList<String>(); 
-					department.add( resultSet.getString("dname"));					
-					employeePayrollListDB.add(new EmployeeData(id, name, salary, startdate,department));
-				}	
+					if(employee != null)
+					{
+						employee.department.add(resultSet.getString("dname"));
+					}
+					else
+					{
+						List<String> department = new ArrayList<String>(); 
+						department.add( resultSet.getString("dname"));					
+						employeePayrollListDB.add(new EmployeeData(id, name, salary, startdate,department));
+					}	
 				}
 				catch(Exception e)
 				{
@@ -322,7 +322,7 @@ public class EmployeePayrollService
 	}
 
 
-	public void addDataInDB(String name, char gender, int basicPay, String startDate)
+	public void addDataInDB(String name, char gender, int basicPay, String startDate,List<String> departments)
 	{
 		int employeeId = 0;
 		Connection connection = null;
@@ -343,21 +343,31 @@ public class EmployeePayrollService
 					employeeId = resultSet.getInt(1);
 				}
 			}		
-			
+
+			//adding data to payroll table
 			double deduction = basicPay*0.2;
 			double taxablePay = basicPay-deduction;
 			double tax = taxablePay*0.1;
 			double netPay = basicPay-tax;
-			
-			// adding data to payroll
 			String query2 =" insert into pay_roll(emp_id,basePay,deduction,taxablePay,IncomeTax,netPay)"
 					+ " values ("+employeeId+","+basicPay+","+deduction+","+taxablePay+","+tax+","+netPay+");";
-			int rowsChangedForquery2 = statement.executeUpdate(query2,Statement.RETURN_GENERATED_KEYS);
-			if (rowsChangedForquery2 == 1) 
+			statement.executeUpdate(query2);
+
+			//setting data to emp_dept table
+			for (String department : departments) 
 			{
-				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate), null)); //TODO add department array				
+				String query3 = "select d_id from department where dname = '"+department+"';";
+				ResultSet resultSet	= statement.executeQuery(query3);
+				if(resultSet.next())
+				{
+					int did = resultSet.getInt(1);
+					String query4 = "insert into emp_dept values ("+employeeId+","+did+");";
+					statement.executeUpdate(query4);
+				}
 			}
+
 			connection.commit();
+			employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate), departments));
 		}
 		catch (Exception e) 
 		{

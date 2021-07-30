@@ -3,6 +3,7 @@ package com.bridgelabz.nioapitest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -173,7 +174,10 @@ public class EmployeePayrollTest
 	{
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		employeePayrollService.readEmployeePayrollFromDB();
-		employeePayrollService.addDataInDB("Mark",'M',40000,"2020-01-03");
+		List<String> department = new ArrayList<>();
+		department.add("marketing");
+		department.add("sales");
+		employeePayrollService.addDataInDB("Mark",'M',40000,"2020-01-03",department);
 		boolean result = employeePayrollService.checkSyncWithDB("Mark");
 		assertTrue(result);
 	}
