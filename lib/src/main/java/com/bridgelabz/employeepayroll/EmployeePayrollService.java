@@ -142,7 +142,8 @@ public class EmployeePayrollService
 	{
 		String sql = "select * from employee"
 				+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
-				+ " join department on (department.d_id=emp_dept.did);";
+				+ " join department on (department.d_id=emp_dept.did)"
+				+ "where is_active = True;";
 		return getQueryResult(sql);
 	}
 
@@ -201,7 +202,7 @@ public class EmployeePayrollService
 	{
 		try(Connection connection = this.getConnection())
 		{
-			String sql = "update employee set basicPay = "+salary+" where name = '"+name+"'";
+			String sql = "update employee set basicPay = "+salary+" where name = '"+name+"' and is_active = True";
 			Statement statement = connection.createStatement();
 			int rowChanged = statement.executeUpdate(sql);
 			return rowChanged;
@@ -285,7 +286,7 @@ public class EmployeePayrollService
 			String sql = "Select * from employee "
 					+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
 					+ " join department on (department.d_id=emp_dept.did)"
-					+ "where name = ? ";
+					+ "where name = ?  and is_active = True";
 			employeePayrollStatement = connection.prepareStatement(sql);
 		}
 		catch (Exception e) 
@@ -300,7 +301,7 @@ public class EmployeePayrollService
 		String sql = " Select  * from employee "
 				+ " join emp_dept on (employee.emp_id=emp_dept.e_id)"
 				+ " join department on (department.d_id=emp_dept.did)"
-				+ " Where start Between cast('"+date+"' as date) and date(now());";
+				+ " Where start Between cast('"+date+"' as date) and date(now()) and is_active = True ;";
 		return getQueryResult(sql);
 	}
 
@@ -308,7 +309,7 @@ public class EmployeePayrollService
 	{
 		try(Connection connection = this.getConnection())
 		{
-			String sql = " select "+operation+"(basicPay) from employee where gender='"+gender+"' group by gender;";
+			String sql = " select "+operation+"(basicPay) from employee where gender='"+gender+"' and is_active = True group by gender  ; ";
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery(sql);
 			resultSet.next();
@@ -393,6 +394,26 @@ public class EmployeePayrollService
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+
+	public void deleteFromDB(String name)
+	{
+		try(Connection connection = this.getConnection())
+		{
+			String sql = " update employee set is_active = false  where name = '"+name+"';";
+			Statement statement = connection.createStatement();
+			int resultSet = statement.executeUpdate(sql);
+			if (resultSet == 1)
+			{
+				EmployeeData employee = employeePayrollListDB.stream().filter(employees -> employees.employeeName.equals(name)).findAny().orElse(null);
+				employeePayrollListDB.remove(employee);
+			}
+			System.out.println(employeePayrollListDB);
+		}
+		catch (Exception e) 
+		{
+			
 		}
 	}
 

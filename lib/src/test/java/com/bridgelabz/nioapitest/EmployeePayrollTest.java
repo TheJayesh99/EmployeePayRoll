@@ -170,7 +170,7 @@ public class EmployeePayrollTest
 	}
 	
 	@Test
-	public void givenEmployeDetails_WhenInserted_ShouldSyncWithDatabase() 
+	public void givenEmployeeDetails_WhenInserted_ShouldSyncWithDatabase() 
 	{
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		employeePayrollService.readEmployeePayrollFromDB();
@@ -180,6 +180,16 @@ public class EmployeePayrollTest
 		employeePayrollService.addDataInDB("Mark",'M',40000,"2020-01-03",department);
 		boolean result = employeePayrollService.checkSyncWithDB("Mark");
 		assertTrue(result);
+	}
+	
+	@Test
+	public void givenEmployeeName_WhenDetele_ShouldDeletefromDB() 
+	{
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollFromDB();
+		employeePayrollService.deleteFromDB("Mark");
+		List<EmployeeData> employeeList = employeePayrollService.readEmployeePayrollFromDB();
+		assertEquals(3, employeeList.size());
 	}
 
 }
