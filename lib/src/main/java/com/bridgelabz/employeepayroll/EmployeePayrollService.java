@@ -302,45 +302,65 @@ public class EmployeePayrollService
 	public void addDataInDB(String name, char gender, int basicPay, String startDate)
 	{
 		int employeeId = 0;
-		try(Connection connection = this.getConnection())
+		Connection connection = null;
+		try
 		{
-			String sql = "insert into employee (name,gender,basicpay,start) values "
-					+ "('"+name+"','"+gender+"',"+basicPay+",'"+startDate+"');";
+			connection = this.getConnection();
+			connection.setAutoCommit(false);
 			Statement statement = connection.createStatement();
-			int rowsChanged = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
-			if (rowsChanged == 1) 
+			//adding data to employee table
+			String query1 = "insert into employee (name,gender,basicpay,start) values "
+					+ "('"+name+"','"+gender+"',"+basicPay+",'"+startDate+"');";
+			int rowsChangedForquery1 = statement.executeUpdate(query1,Statement.RETURN_GENERATED_KEYS);
+			if (rowsChangedForquery1 == 1) 
 			{
 				ResultSet resultSet = statement.getGeneratedKeys();
 				if(resultSet.next())
 				{
 					employeeId = resultSet.getInt(1);
 				}
-			}
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-		try(Connection connection = this.getConnection())
-		{
+			}		
+			
 			double deduction = basicPay*0.2;
 			double taxablePay = basicPay-deduction;
 			double tax = taxablePay*0.1;
 			double netPay = basicPay-tax;
-		
-			String sql =" insert into pay_roll(emp_id,basePay,deduction,taxablePay,IncomeTax,netPay)"
+			
+			// adding data to payroll
+			String query2 =" insert into pay_roll(emp_id,basePay,deduction,taxablePay,IncomeTax,netPay)"
 					+ " values ("+employeeId+","+basicPay+","+deduction+","+taxablePay+","+tax+","+netPay+");";
-			Statement statement = connection.createStatement();
-			int rowsChanged = statement.executeUpdate(sql,Statement.RETURN_GENERATED_KEYS);
-			if (rowsChanged == 1) 
+			int rowsChangedForquery2 = statement.executeUpdate(query2,Statement.RETURN_GENERATED_KEYS);
+			if (rowsChangedForquery2 == 1) 
 			{
 				employeePayrollListDB.add(new EmployeeData(employeeId, name,basicPay,LocalDate.parse(startDate)));
 				System.out.println(employeePayrollListDB.toString());
 			}
+			connection.commit();
 		}
 		catch (Exception e) 
 		{
+			try {
+				connection.rollback();
+			} 
+			catch (SQLException e1)
+			{
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
+		}
+		finally 
+		{
+			if (connection != null)
+			{
+				try 
+				{
+					connection.close();
+				} 
+				catch (SQLException e) 
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
